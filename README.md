@@ -39,6 +39,12 @@ Fortunately for `EtherPSI`, many of the same innovations that are being used in 
 - VRF (verifiable random functions)
 - RanDAO's
 
+Further reading:
+- https://zkasino.medium.com/how-zkasino-will-handle-randomness-on-starknet-9bf1531b1236
+https://twitter.com/zkasino_io/status/1499092681590378496?s=21
+- https://vitalik.ca/general/2022/06/15/using_snarks.html
+
+
 ### Keeping Secrets (WIP)
 - Hash pre-commitments
 - Zero-knowledge proofs
