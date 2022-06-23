@@ -74,4 +74,4 @@ The execution of this experiment would demonstrate and further validate there do
 
 ## Proposal
 
-Human psi capabalities are not yet accepted in the mainstream. An experiment such as this, upon execution and publication of results, would generate media coverage which would increase attention, reputation and further the legitimacy of any sponsoring entities.
+Human psi capabalities are not yet accepted in the mainstream. An experiment such as this, upon execution and publication of results, would generate media coverage which would increase attention to any sponsoring entities.
