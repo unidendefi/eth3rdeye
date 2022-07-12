@@ -28,16 +28,77 @@ They describe the difficulties of testing this hypothesis, and how the execution
 
 - Improve reproducibility of psi experiments by several orders of magnitude, making it easier, cheaper and efficient while still retaining characteristics of being fraud-proof, verifiable and auditable 
 - Develop open-source software to facilitate psi experiments, including necessary smart contract, infrastructure services, data collection/analysis and front-ends as needed. Documentation and code included so experiments can be remixed, modified and reproduced.
-- Deliver a proof-of-concept application, code-named `EtherPSI` which implements the system design and allows for runing a psi experiment and associated data collection
+- Deliver a proof-of-concept application which implements the system design and allows for runing a psi experiment and associated data collection
 
-## Methodology (WIP)
-Crypto gaming is one of the burgeoning categories of so-called "web 3" applications that are in development. Many of these use smart contracts as an execution environment for game logic. However, significant challenges remain. In an adversarial environment where "real money" is involved, on-chain mechanism designs need to be verifiable, fraud-proof and legitimate in order for crypto games to thrive.
+## Methodology - Remote Viewing
 
-Fortunately for `EtherPSI`, many of the same innovations that are being used in crypto games are applicable for the psi experiment simulation system described in this document.
+The methodology defined here describes a way to execute remote viewing experiments while still retaining the characteristics of a secure, verifiable environment that can be audited.
+### The Need for Secrets
 
-### Achieving Randomness (WIP)
-- VRF (verifiable random functions)
-- RanDAO's
+A system that executes code as a smart contract on a public blockchain would typically enable any and all parties to view the data of those transactions. All validating nodes in the network need to validate that submitted transactions execute correctly according to the rules of the smart contract. Therefore the input data needs to be public in order to perform this validation.
+
+In the example of a remote viewing game, there is a secret `Target` which players must guess the composition of. As this game is played as a smart contract running on a blockchain, there needs to be some way to validate the guesses against the Target. There are a few approaches to implement this. Note: The Target will be assumed to be a series of characters (words, etc) that describe an object/place/thing. Using images or other targets is outside of the scope.
+
+The incorrect approach would be to store the value of the secret in plain text as a smart-contract storage variable. Everyone would be able to see it, even with a basic understanding of how blockchains work (i.e checking Etherscan and reading contract variable). This design is flawed as it allows for "cheating" the game.
+
+### Word Modularization
+
+Before describing implementations, it's important to reduce the scope of the problem a bit. Let's take this series of words as an example target:
+
+> A metal, cyclindrical screw driver with a yellow handle
+
+Any English sentence can be broken down into discrete structures of nouns, adjectives, and verbs.
+
+Nouns:
+- screw driver
+
+Adjectives:
+- metal
+- cyclindrical
+- yellow
+
+Verbs:
+- *none*
+
+So instead of using the raw sentence above, we can use a series of discrete words that represent the target: [`metal`, `screw driver`, `cyclinder`, `yellow`]. This modularization of the sentence gives a rough approximation of the meaning behind the target. This does impose certain limitations on the kinds of targets selected (targets cannot be photos, they must be words). However, this modularization also grants important characteristics:
+
+- **Scoring system**. By modularizing the Target words, we can easily develop a scoring system for matching against individual words (nouns, adjectives, verbs). We can even compose partial hits and incorporate that into scoring. Ex. 2 partial hits is better than 1, but a full hit is the best. This way, the need for a third-party to evaluate scoring subjectively is eliminated. In fact, the scoring can be done as part of the smart contract logic. Without this modularization, scoring becomes subjective, less strict and must occur off-chain.
+
+- **Language constraints**. Characterizing a target can take on different syntaxes, forms and tenses. `Cyclinder` and `Cylindrical` are equal approximations, with one being an adjective and the other being a noun. When attempting to assign scores to target guesses, it's valuable to normalize these language quirks into a standardized library of words. This normalization forms a sort of guard rail system where guess words can have a large design space but can still allow guesses to stay on track.
+### Implementation: Hash commit-reveal scheme
+The simplest approach would be to store a hash of the value of the secret. "A one-way hash function is a mathematical function that generates a fingerprint of the input, but there is no way to get back to the original input." [Technipages](https://www.technipages.com/definition/one-way-hash-function).
+
+The MD5 hash with the words (input) `metal screw driver cyclinder yellow` is computed as `8d58ff5c71c00aa59eb4bc32186236de` (fingerprint).
+
+The hash would be enough to conceal the secret from the public, and allow for a time window where guesses are submitted. The person who creates the Target, the `TargetProducer`, must reveal the secret input of the hash after the guessing window is completed. That way, it can be verified that the TargetProducer did not change the target half-way through the test. In other words, the hash commit-reveal is a way to "lock-in" the target.
+
+In this implementation, `Viewers` publish their guess as a blockchain transaction in order to register their guess.
+
+The downsides of this approach are:
+1. The TargetProducer must reveal the secret input. If they do not, there can be no verification of guesses against the target.
+2. By modularizing the words of the target, someone could iterate through all of the words, hash the results and compare against the `hash(secret)` which is stored on the blockchain. Then they would know what the words were and be able to cheat the system.
+3. By publishing a blockchain transaction, the identity of the Viewer is revealed. Wallet addresses are typically thought to be anonymous but in fact they could be de-anonymized by linking to an identity an exchange account, for example. This limitation can possibly be removed altogether by utilizing a zero-knowledge proof submitted to a verifier which verifies the submission without revealing the input address.
+
+To mitigate against 2, the TargetProducer is asked to generate another secret, called the [`salt`](https://en.wikipedia.org/wiki/Salt_(cryptography)). This would prevent a cheater from iterating through all of the words to match the published target, because they wouldn't know the salt. As part of the the reveal stage, the TargetProducer will reveal the secret words as well as the salt. Once the secret and the salt is revealed, scores can be calculated and the target verified as being the same that was initially chosen.
+
+#### Mechanics 
+Once the hash is submitted an epoch begins. An epoch is the time period in which a Target has been decided on and viewers can guess what the Target is. For example, an epoch can be 1 day long. Once the epoch is over, the TargetProducer has a limited time to broadcast the secret Target to the network.
+
+### Assessing Target Accuracy
+So far, the system is capable of keeping a secret subset of a list of words. When the epoch is concluded and the secret is revealed, published guesses can be matched with a score:
+- None: none of the guess words were part of the Target
+- Partial: some of the guess words were part of the Target
+- Full: all of the words matched exactly
+
+This is possible because of the word modularization of the Target. A guess for `yellow` and `metal` would be counted as a partial score. Once the word list is known, all permutations of the words are automatically checked by the software so that Partial matches can be attributed.
+
+### Reducing coordination
+There exists a problem where a TargetProducer can coordinate via private communication channels to Viewers what the target was, allowing the Viewer to cheat and score higher. In this way the integrity of the experiment falls apart from this cheating. Some ways to mitigate this are:
+
+1. Randomly choose `TargetProducer` for a given epoch `E` from a pool of participants. This decreases the chance of coordination on aggregate across multiple.
+2. Split the TargetProducer into multiple shards, so that the target words only can describe a partial part of the target: Ex. Shard 1: `yellow handle`, Shard 2: `cyclindrical screwdriver`. However this would then require multiple reveal stages, which can become cumbersome and risks a full reveal not occuring.
+
+There exists the possibility for a so-called "Sybil-attack", where fake participants are programmatically created (similar to bots) and increase the chances for selection as TargetProducer. This can be mitigated with protocols that attest to [Proof-of-humanity](https://www.proofofhumanity.id).
 
 Further reading:
 - https://zkasino.medium.com/how-zkasino-will-handle-randomness-on-starknet-9bf1531b1236
