@@ -92,6 +92,26 @@ So far, the system is capable of keeping a secret subset of a list of words. Whe
 
 This is possible because of the word modularization of the Target. A guess for `yellow` and `metal` would be counted as a partial score. Once the word list is known, all permutations of the words are automatically checked by the software so that Partial matches can be attributed.
 
+### The Statement Tree
+A form of structuring targets is used at `Problems > Solutions > Innovations`, which is Lyn Buchanan's controlled remote viewing program. See [How do you score session results?](https://www.crviewer.com/faqs/training/faq001.php) Lyn also identified the problem of scoring and devised a heirarchical system. In terms of being able to deploy a similar technique that is automatically evaluated in the smart contract, a formal definition is required: divide the target sentence into a sub-tree of statements, where the root of the tree is the most significant description, leaves are descriptive statements, and branches can form which categorize further descriptive statements.
+```
+The viewer's statement is changed from:
+There is a red moving vehicle against an unmarked, green background.
+to
+- 1. There is a vehicle
+    - 1.a which is red
+    - 1.b and moving
+    - 1.c against a background
+        - 1.c.1 which is unmarked
+        - 1.c.2 and green
+```
+
+*Note* Annotations were added to label each line. In this Statement Tree, the root word is `vehicle` with label `1`, labels `1.a` to `1.c` are direct sub-statements of the root, and `1.c` forms a branch that is further described in statements `1.c.1 ` and `1.c.2`.
+
+Using this `Statement Tree`, it is possible to embed Word Modularization within a heirarchy that describes the meaning and associations between the words, allowing for more precise scoring and a larger design space for the target statement.
+
+From a programmatic perspective, this statement tree is also traversible and verifiable. In the same way that `hash(target)` allows the verification of the integrity of the target, a [Merkle tree](https://en.wikipedia.org/wiki/Merkle_tree) structure allows to verify the integrity of the Statement Tree.
+
 ### Reducing coordination
 There exists a problem where a TargetProducer can coordinate via private communication channels to Viewers what the target was, allowing the Viewer to cheat and score higher. In this way the integrity of the experiment falls apart from this cheating. Some ways to mitigate this are:
 
