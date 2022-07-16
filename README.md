@@ -120,18 +120,8 @@ There exists a problem where a TargetProducer can coordinate via private communi
 
 There exists the possibility for a so-called "Sybil-attack", where fake participants are programmatically created (similar to bots) and increase the chances for selection as TargetProducer. This can be mitigated with protocols that attest to [Proof-of-humanity](https://www.proofofhumanity.id).
 
-Further reading:
-- https://zkasino.medium.com/how-zkasino-will-handle-randomness-on-starknet-9bf1531b1236
-https://twitter.com/zkasino_io/status/1499092681590378496?s=21
-- https://vitalik.ca/general/2022/06/15/using_snarks.html
-
-
-### Keeping Secrets (WIP)
-- Hash pre-commitments
-- Zero-knowledge proofs
-
-### Fraud Proof (WIP)
-- Anonymity sets reduce the likelihood of coordination
+#### Single-player mode
+It's worth mentioning that coordination would only be sought out by malicious actors who are trying to game the system. However, there are uses of the software where this is actually not a concern, and therefore does not need to be mitigated. For example, a curious skeptic who is interested to see if "this is real" and decides to try out the system. If they create a Target and submit it to the network, the assumption of honesty is built-in because they are the TargetProducer and do not have incentives to cheat or tell anyone the target.
 
 ## Implications
 
