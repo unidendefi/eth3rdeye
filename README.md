@@ -30,9 +30,11 @@ They describe the difficulties of testing this hypothesis, and how the execution
 - Develop open-source software to facilitate psi experiments, including necessary smart contract, infrastructure services, data collection/analysis and front-ends as needed. Documentation and code included so experiments can be remixed, modified and reproduced.
 - Deliver a proof-of-concept application which implements the system design and allows for runing a psi experiment and associated data collection
 
-## Methodology - Remote Viewing
+## Methodology - Controlled Remote Viewing
 
-The methodology defined here describes a way to execute remote viewing experiments while still retaining the characteristics of a secure, verifiable environment that can be audited.
+The methodology defined here describes a way to execute controlled remote viewing experiments executed using smart contracts, while having "stringent 
+controls, fraud-proof testing conditions, and obsessive attention to data collection and verification".
+
 ### The Need for Secrets
 
 A system that executes code as a smart contract on a public blockchain would typically enable any and all parties to view the data of those transactions. All validating nodes in the network need to validate that submitted transactions execute correctly according to the rules of the smart contract. Therefore the input data needs to be public in order to perform this validation.
@@ -77,7 +79,7 @@ In this implementation, `Viewers` publish their guess as a blockchain transactio
 The downsides of this approach are:
 1. The TargetProducer must reveal the secret input. If they do not, there can be no verification of guesses against the target.
 2. By modularizing the words of the target, someone could iterate through all of the words, hash the results and compare against the `hash(secret)` which is stored on the blockchain. Then they would know what the words were and be able to cheat the system.
-3. By publishing a blockchain transaction, the identity of the Viewer is revealed. Wallet addresses are typically thought to be anonymous but in fact they could be de-anonymized by linking to an identity an exchange account, for example. This limitation can possibly be removed altogether by utilizing a zero-knowledge proof submitted to a verifier which verifies the submission without revealing the input address.
+3. By publishing a blockchain transaction, the identity of the Viewer is revealed. Wallet addresses are typically thought to be anonymous but in fact they could be de-anonymized by linking to an identity exchange account, for example. This limitation can possibly be removed altogether by utilizing a zero-knowledge proof submitted to a verifier which verifies the logic without revealing the input address.
 
 To mitigate against 2, the TargetProducer is asked to generate another secret, called the [`salt`](https://en.wikipedia.org/wiki/Salt_(cryptography)). This would prevent a cheater from iterating through all of the words to match the published target, because they wouldn't know the salt. As part of the the reveal stage, the TargetProducer will reveal the secret words as well as the salt. Once the secret and the salt is revealed, scores can be calculated and the target verified as being the same that was initially chosen.
 
@@ -93,7 +95,11 @@ So far, the system is capable of keeping a secret subset of a list of words. Whe
 This is possible because of the word modularization of the Target. A guess for `yellow` and `metal` would be counted as a partial score. Once the word list is known, all permutations of the words are automatically checked by the software so that Partial matches can be attributed.
 
 ### The Statement Tree
-A form of structuring targets is used at `Problems > Solutions > Innovations`, which is Lyn Buchanan's controlled remote viewing program. See [How do you score session results?](https://www.crviewer.com/faqs/training/faq001.php) Lyn also identified the problem of scoring and devised a heirarchical system. In terms of being able to deploy a similar technique that is automatically evaluated in the smart contract, a formal definition is required: divide the target sentence into a sub-tree of statements, where the root of the tree is the most significant description, leaves are descriptive statements, and branches can form which categorize further descriptive statements.
+A form of structuring targets is used at `Problems > Solutions > Innovations`, which is Lyn Buchanan's controlled remote viewing program. See [How do you score session results?](https://www.crviewer.com/faqs/training/faq001.php) P>S>I describes the following problem:
+
+> You have a problem in scoring. A debunker would say, "He got the red in the wrong place! See? Remote viewing doesn't work at all!" A person who is desperate to believe anything and everything psychic would say, "Well, he got the red right, just in the wrong place, and most vehicles move, so let's give him credit for those two perceptions". Each of these is as unscientific, illogical, and undependable as the other.
+
+A heirarchical system of meaning was introduced to address this. In terms of being able to deploy a similar technique that is automatically evaluated in the smart contract, a formal definition is required, which is the following: organize the target sentence into a sub-tree of statements, where the root of the tree is the most significant description, leaves are descriptive statements, and branches can form which categorize further descriptive statements.
 ```
 The viewer's statement is changed from:
 There is a red moving vehicle against an unmarked, green background.
@@ -115,10 +121,10 @@ From a programmatic perspective, this statement tree is also traversible and ver
 ### Reducing coordination
 There exists a problem where a TargetProducer can coordinate via private communication channels to Viewers what the target was, allowing the Viewer to cheat and score higher. In this way the integrity of the experiment falls apart from this cheating. Some ways to mitigate this are:
 
-1. Randomly choose `TargetProducer` for a given epoch `E` from a pool of participants. This decreases the chance of coordination on aggregate across multiple.
+1. Randomly choose `TargetProducer` for a given epoch `E` from a pool of participants. This decreases the chance of coordination on aggregate across multiple rounds.
 2. Split the TargetProducer into multiple shards, so that the target words only can describe a partial part of the target: Ex. Shard 1: `yellow handle`, Shard 2: `cyclindrical screwdriver`. However this would then require multiple reveal stages, which can become cumbersome and risks a full reveal not occuring.
 
-There exists the possibility for a so-called "Sybil-attack", where fake participants are programmatically created (similar to bots) and increase the chances for selection as TargetProducer. This can be mitigated with protocols that attest to [Proof-of-humanity](https://www.proofofhumanity.id).
+There exists the possibility for a so-called "Sybil-attack", where fake participants are programmatically created (similar to bots) and increase the chances for selection as TargetProducer. This can be mitigated with protocols that attest to [Proof-of-humanity](https://www.proofofhumanity.id) and other anti-Sybil mechanisms.
 
 #### Single-player mode
 It's worth mentioning that coordination would only be sought out by malicious actors who are trying to game the system. However, there are uses of the software where this is actually not a concern, and therefore does not need to be mitigated. For example, a curious skeptic who is interested to see if "this is real" and decides to try out the system. If they create a Target and submit it to the network, the assumption of honesty is built-in because they are the TargetProducer and do not have incentives to cheat or tell anyone the target.
