@@ -1,5 +1,7 @@
 # Eth3rdEye
 
+Pronounced "e-third-eye"
+
 *This is work in progress and may change frequently. Check file history for changes*
 
 ## Abstract
